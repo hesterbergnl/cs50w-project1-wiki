@@ -1,9 +1,9 @@
 {% extends "encyclopedia/layout.html" %}
 
 {% block title %}
-    article
+    {{title}}
 {% endblock %}
 
 {% block body %}
-    {{title|safe}}
+    {{entry|safe}}
 {% endblock %}
