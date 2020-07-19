@@ -37,3 +37,9 @@ def add(request):
 		return render(request, "encyclopedia/add.html", {
 				"form": NewArticleForm()
 			})
+
+def search(request):
+	query = request.GET['q']
+	return render(request, "encyclopedia/search.html", {
+			"query": query
+		})
