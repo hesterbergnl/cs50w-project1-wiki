@@ -35,3 +35,15 @@ def get_entry(title):
         return f.read().decode("utf-8")
     except FileNotFoundError:
         return None
+
+def find_substrings(search_term):
+    """
+    Retreives article titles that the search is a substring of
+    """
+    entries = list_entries()
+    search_results = []
+    for entry in entries:
+        if search_term in entry:
+            search_results.append(entry)
+
+    return search_results
