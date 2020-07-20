@@ -55,3 +55,10 @@ def edit(request, title):
 	return render(request, "encyclopedia/add.html", {
 				"form": NewArticleForm(initial={'title': title, 'body': body})
 			})
+
+def random(request):
+	title = util.random_page()
+	return render(request, "encyclopedia/wiki.html", {
+			"title": title,
+			"entry": markdown2.markdown(util.get_entry(title))
+		})

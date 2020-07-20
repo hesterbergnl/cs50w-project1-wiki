@@ -2,6 +2,7 @@ import re
 
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
+from random import randint
 
 
 def list_entries():
@@ -47,3 +48,8 @@ def find_substrings(search_term):
             search_results.append(entry)
 
     return search_results
+
+def random_page():
+    entries = list_entries()
+    random_number = randint(0, len(entries) - 1)
+    return entries[random_number]
