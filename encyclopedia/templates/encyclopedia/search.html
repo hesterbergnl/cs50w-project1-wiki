@@ -5,11 +5,10 @@
 {% endblock %}
 
 {% block body %}
-<h1> Search results for {{query}}: </h1>>
-<ul>
-	{% for entry in results %}
-		<li> <a href="{% url 'encyclopedia:wiki'  title=entry%}">{{ entry }}</a> </li>
-    {% end for %}
-</ul>
-    
+	<h1> Search results for {{query}}: </h1>
+	<ul>
+		{% for entry in results %}
+			<li> <a href="{% url 'encyclopedia:wiki'  title=entry%}">{{ entry }}</a> </li>
+	    {% endfor %}
+	</ul>
 {% endblock %}

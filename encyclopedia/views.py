@@ -22,7 +22,6 @@ def wiki(request, title):
 		})
 
 def add(request, title=""):
-	body = ""
 	if request.method == "POST":
 		form = NewArticleForm(request.POST)
 		if form.is_valid():
@@ -35,25 +34,24 @@ def add(request, title=""):
 					"form": form
 				})
 	else:
-		if title != "":
-			body = util.get_entry(title)
 		return render(request, "encyclopedia/add.html", {
-				"form": NewArticleForm(initial={'tank': title, 'body': body})
+				"form": NewArticleForm(initial={'title': title, 'body': body})
 			})
 
 def search(request):
 	query = request.GET['q']
 	entry = util.get_entry(query)
 	if entry != None:
-		return HttpResponseRedirect(reverse("encyclopedia:wiki" query))
+		return HttpResponseRedirect(reverse("encyclopedia:wiki" , args=[query]))
 	else:
-		serach_results = util.find_substrings(query)
+		search_results = util.find_substrings(query)
 		return render(request, "encyclopedia/search.html", {
 				"query": query,
 				"results": search_results
 			})
-	"""
-	return render(request, "encyclopedia/search.html", {
-			"query": query
-		})
-	"""
+
+def edit(request, title):
+	body = util.get_entry(title)
+	return render(request, "encyclopedia/add.html", {
+				"form": NewArticleForm(initial={'title': title, 'body': body})
+			})
