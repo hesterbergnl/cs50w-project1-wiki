@@ -58,7 +58,9 @@ def edit(request, title):
 
 def random(request):
 	title = util.random_page()
-	return render(request, "encyclopedia/wiki.html", {
+	return HttpResponseRedirect(reverse("encyclopedia:wiki" , args=[title]))
+	
+'''	return render(request, "encyclopedia/wiki.html", {
 			"title": title,
 			"entry": markdown2.markdown(util.get_entry(title))
-		})
+		})'''
