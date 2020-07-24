@@ -5,10 +5,24 @@ from django import forms
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 
+#New Article Form
+#Contains a edit_mode field for validation if the article exists
 class NewArticleForm(forms.Form):
 	title = forms.CharField(label="Title")
 	body =  forms.CharField(widget=forms.Textarea(attrs={"rows":5, "cols":20}), label="Body (markdown)")
+	edit_mode = forms.BooleanField(widget=forms.HiddenInput(), initial=False, required=False)
 
+	#https://stackoverflow.com/questions/30227119/extending-form-is-valid
+	def clean(self):
+		cd = self.clean_data()
+		title = cd.get("title")
+		body = cd.get("body")
+		edit_mode = cd.get("edit_mode")
+		#https://developer.mozilla.org/en-US/docs/Learn/Server-side/Django/Forms
+		if(!edit_mode AND util.get_entry(title) != None):
+			raise ValidationError(_('Invalid title - article already exists'))
+
+		return cd
 
 def index(request):
     return render(request, "encyclopedia/index.html", {
@@ -21,14 +35,15 @@ def wiki(request, title):
 			"entry": markdown2.markdown(util.get_entry(title))
 		})
 
-def add(request, title=""):
+def add(request):
 	if request.method == "POST":
 		form = NewArticleForm(request.POST)
 		if form.is_valid():
 			title = form.cleaned_data["title"]
 			body = form.cleaned_data["body"]
+			
 			util.save_entry(title, body)
-			return HttpResponseRedirect(reverse("encyclopedia:index"))
+			return HttpResponseRedirect(reverse("encyclopedia:wiki" , args=[title]))
 		else:
 			return render(request, "add.html", {
 					"form": form
@@ -53,7 +68,7 @@ def search(request):
 def edit(request, title):
 	body = util.get_entry(title)
 	return render(request, "encyclopedia/add.html", {
-				"form": NewArticleForm(initial={'title': title, 'body': body})
+				"form": NewArticleForm(initial={'title': title, 'body': body, 'edit_mode': True})
 			})
 
 def random(request):
