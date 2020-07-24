@@ -14,15 +14,15 @@ class NewArticleForm(forms.Form):
 
 	#https://stackoverflow.com/questions/30227119/extending-form-is-valid
 	def clean(self):
-		cd = self.clean_data()
-		title = cd.get("title")
-		body = cd.get("body")
-		edit_mode = cd.get("edit_mode")
+		cleaned_data = self.cleaned_data
+		title = cleaned_data.get("title")
+		body = cleaned_data.get("body")
+		edit_mode = cleaned_data.get("edit_mode")
 		#https://developer.mozilla.org/en-US/docs/Learn/Server-side/Django/Forms
-		if(!edit_mode AND util.get_entry(title) != None):
-			raise ValidationError(_('Invalid title - article already exists'))
+		if(not edit_mode and util.get_entry(title) != None):
+			raise forms.ValidationError('Invalid title - article already exists')
 
-		return cd
+		return cleaned_data
 
 def index(request):
     return render(request, "encyclopedia/index.html", {
@@ -30,10 +30,14 @@ def index(request):
     })
 
 def wiki(request, title):
-	return render(request, "encyclopedia/wiki.html", {
-			"title": title,
-			"entry": markdown2.markdown(util.get_entry(title))
-		})
+	raw_markdown = util.get_entry(title)
+	if(raw_markdown == None):
+		return render(request, "encyclopedia/page_not_found.html")
+	else:
+		return render(request, "encyclopedia/wiki.html", {
+				"title": title,
+				"entry": markdown2.markdown(raw_markdown)
+			})
 
 def add(request):
 	if request.method == "POST":
@@ -45,12 +49,12 @@ def add(request):
 			util.save_entry(title, body)
 			return HttpResponseRedirect(reverse("encyclopedia:wiki" , args=[title]))
 		else:
-			return render(request, "add.html", {
+			return render(request, "encyclopedia/add.html", {
 					"form": form
 				})
 	else:
 		return render(request, "encyclopedia/add.html", {
-				"form": NewArticleForm(initial={'title': title, 'body': body})
+				"form": NewArticleForm()
 			})
 
 def search(request):
