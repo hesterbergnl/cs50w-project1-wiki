@@ -50,6 +50,10 @@ def find_substrings(search_term):
     return search_results
 
 def random_page():
+    """
+    Finds a random number between 0 and the length of the entries list
+    Returns the name of a random article
+    """
     entries = list_entries()
     random_number = randint(0, len(entries) - 1)
     return entries[random_number]

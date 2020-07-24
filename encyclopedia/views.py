@@ -10,6 +10,8 @@ from django.urls import reverse
 class NewArticleForm(forms.Form):
 	title = forms.CharField(label="Title")
 	body =  forms.CharField(widget=forms.Textarea(attrs={"rows":5, "cols":20}), label="Body (markdown)")
+	#Hidden edit mode
+	#Used for form validation so a duplicate article isn't created accidentally
 	edit_mode = forms.BooleanField(widget=forms.HiddenInput(), initial=False, required=False)
 
 	#https://stackoverflow.com/questions/30227119/extending-form-is-valid
@@ -29,6 +31,8 @@ def index(request):
         "entries": util.list_entries()
     })
 
+#Takes the title of the article and renders the HTML from markdown content
+#First checks that the title is valid and if not renders a page not found template
 def wiki(request, title):
 	raw_markdown = util.get_entry(title)
 	if(raw_markdown == None):
@@ -39,6 +43,9 @@ def wiki(request, title):
 				"entry": markdown2.markdown(raw_markdown)
 			})
 
+#Add will render the add page with an article form if it is a get request
+#if a post request, it will check the form being valid then either return the original form
+#with an error or submit the form and load the newly created page
 def add(request):
 	if request.method == "POST":
 		form = NewArticleForm(request.POST)
@@ -57,6 +64,11 @@ def add(request):
 				"form": NewArticleForm()
 			})
 
+#Searches the database, looking for substrings
+#The method finds the q 'get' parameter then checks if its a valid article title
+#If an article exists, it redirects to it
+#If not, then it uses the find_substrings method to search for any titles that contain
+#The string as a substring
 def search(request):
 	query = request.GET['q']
 	entry = util.get_entry(query)
@@ -69,17 +81,15 @@ def search(request):
 				"results": search_results
 			})
 
+#Calls the add method, but the form by default gets the page's title, body, and edit mode set as "true"
 def edit(request, title):
 	body = util.get_entry(title)
 	return render(request, "encyclopedia/add.html", {
 				"form": NewArticleForm(initial={'title': title, 'body': body, 'edit_mode': True})
 			})
 
+#Calls a random page, using the util.random_page method
+#redirects to the random entry
 def random(request):
 	title = util.random_page()
 	return HttpResponseRedirect(reverse("encyclopedia:wiki" , args=[title]))
-	
-'''	return render(request, "encyclopedia/wiki.html", {
-			"title": title,
-			"entry": markdown2.markdown(util.get_entry(title))
-		})'''
